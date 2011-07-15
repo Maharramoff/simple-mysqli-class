@@ -35,8 +35,15 @@ class simpleMysqli extends simpleDB
          * @var $username
          * @var $password
          * @var $port
+         * @var $charset
          */
-        $this->db_resource = new mysqli($server, $username, $password, $db, $port) or userException::cast(mysqli_error());
+        //writeLn('Инициация соединения с БД: ', $this->db = $db);
+        $this->db_resource = new mysqli($server, $username, $password, $db, $port);
+        $this->db_resource->set_charset($charset);
+        
+        if($this->db_resource->connect_error){
+            userException::cast($this->db_resource->connect_error);
+        }
     }
 
     /**
@@ -70,7 +77,7 @@ class simpleMysqli extends simpleDB
     }
 
     /**
-     * RollBack transaction query
+     * RollBack transaction query<br>
      * <b>Example:</b>
      * <code>
      * $db=new simpleMysqli($config);
@@ -85,7 +92,7 @@ class simpleMysqli extends simpleDB
      */
     public function transactionRollBack()
     {
-        return $this->db_resource->rollback();
+        $this->db_resource->rollback();
     }
 
     /**
@@ -94,6 +101,7 @@ class simpleMysqli extends simpleDB
      */
     protected function s_query()
     {
+        $data = null;
         $arguments = func_get_args();
         $this->query($arguments);
         if (!$this->stmp) return false;
@@ -108,6 +116,10 @@ class simpleMysqli extends simpleDB
         $rows = $this->$returnPrepareMethod($data);
         $this->setQueryInfo();
         return $rows;
+    }
+
+    public function simpleQuery($query){
+        return $this->db_resource->query($query);
     }
 
     protected function query($arguments)
@@ -337,9 +349,17 @@ class simpleMysqli extends simpleDB
         }
         return $type;
     }
+    /**
+     * Возвращает обьект класса mysqli для нереализованных операций
+     * @return mysqli
+     */
+    public function _getObject(){
+        return $this->db_resource;
+    }
 
     public function __destruct()
     {
         $this->db_resource->close();
+        //writeLn('Соединение с БД ' . $this->db . ' разорвано');
     }
 }
