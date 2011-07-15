@@ -42,7 +42,7 @@ class simpleMysqli extends simpleDB
         $this->db_resource->set_charset($charset);
         
         if($this->db_resource->connect_error){
-            userException::cast($this->db_resource->connect_error);
+            throw new Exception($this->db_resource->connect_error);
         }
     }
 
