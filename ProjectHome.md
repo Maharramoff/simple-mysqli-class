@@ -1,0 +1,1 @@
+DbSimple-like syntax, lot of comments.
